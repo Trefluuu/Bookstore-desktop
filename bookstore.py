@@ -12,6 +12,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import requests
 import mysql.connector as mc
 from login import *
+from favourites import *
+from cart import *
 
 
 class Bookstore(object):
@@ -41,7 +43,7 @@ class Bookstore(object):
         self.loginButton.setFont(font)
         self.loginButton.setStyleSheet("background-color: \"grey\"")
         self.loginButton.setObjectName("loginButton")
-        self.loginButton.clicked.connect(self.login)
+        self.loginButton.clicked.connect(self.login1)
 
         self.cartButton = QtWidgets.QPushButton(self.frame)
         self.cartButton.setGeometry(QtCore.QRect(40, 20, 131, 51))
@@ -50,6 +52,7 @@ class Bookstore(object):
         self.cartButton.setFont(font)
         self.cartButton.setStyleSheet("background-color: \"red\"")
         self.cartButton.setObjectName("cartButton")
+        self.cartButton.clicked.connect(self.cart)
 
         self.favouriteButton = QtWidgets.QPushButton(self.frame)
         self.favouriteButton.setGeometry(QtCore.QRect(40, 80, 131, 51))
@@ -58,6 +61,8 @@ class Bookstore(object):
         self.favouriteButton.setFont(font)
         self.favouriteButton.setStyleSheet("background-color:  rgb(173,216,230)")
         self.favouriteButton.setObjectName("favouriteButton")
+        self.favouriteButton.clicked.connect(self.favourites)
+
         self.searchEdit = QtWidgets.QLineEdit(self.frame)
         self.searchEdit.setGeometry(QtCore.QRect(430, 70, 281, 31))
         self.searchEdit.setStyleSheet("background-color: white;")
@@ -81,12 +86,13 @@ class Bookstore(object):
         self.addToFavButton.setGeometry(QtCore.QRect(680, 640, 141, 41))
         self.addToFavButton.setStyleSheet("background-color:  rgb(173,216,230)")
         self.addToFavButton.setObjectName("addToFavButton")
-        self.addToFavButton.clicked.connect(self.insertData)
+        self.addToFavButton.clicked.connect(self.addToFavourite)
 
         self.addToCartButton = QtWidgets.QPushButton(Form)
         self.addToCartButton.setGeometry(QtCore.QRect(430, 640, 141, 41))
         self.addToCartButton.setStyleSheet("background-color: \"red\"")
         self.addToCartButton.setObjectName("addToCartButton")
+        self.addToCartButton.clicked.connect(self.addToCart)
         self.tableWidget.setColumnWidth(0, 608)
         self.tableWidget.setColumnWidth(1, 100)
 
@@ -122,11 +128,62 @@ class Bookstore(object):
             self.tableWidget.setItem(row, 1, QtWidgets.QTableWidgetItem(book[books]['price']))
             row=row+1
 
-    def login(self):
+    def addToFavourite(self):
+        row = self.tableWidget.currentRow()
+
+        title = (self.tableWidget.item(row, 0).text())
+        price = (self.tableWidget.item(row, 1).text())
+
+        mydb = mc.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="bookstore"
+        )
+
+        mycursor = mydb.cursor()
+        sql = "INSERT INTO favourites (title, price) VALUES (%s, %s)"
+        val = (title, price)
+        mycursor.execute(sql, val)
+        mydb.commit()
+
+    def addToCart(self):
+        row = self.tableWidget.currentRow()
+
+        title = (self.tableWidget.item(row, 0).text())
+        price = (self.tableWidget.item(row, 1).text())
+
+        mydb = mc.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="bookstore"
+        )
+
+        mycursor = mydb.cursor()
+        sql = "INSERT INTO cart (title, price) VALUES (%s, %s)"
+        val = (title, price)
+        mycursor.execute(sql, val)
+        mydb.commit()
+
+    def login1(self):
         self.window = QtWidgets.QWidget()
         self.ui = Login()
         self.ui.setupUi(self.window)
         self.window.show()
+
+    def favourites(self):
+        self.window1 = QtWidgets.QWidget()
+        self.ui1 = Ui_Favourites()
+        self.ui1.setupUi(self.window1)
+        self.window1.show()
+
+    def cart(self):
+        self.cartWindow = QtWidgets.QWidget()
+        self.ui2 = Ui_Cart()
+        self.ui2.setupUi(self.cartWindow)
+        self.cartWindow.show()
+
 
 
 if __name__ == "__main__":

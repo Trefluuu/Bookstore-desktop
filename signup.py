@@ -9,6 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import requests
 import mysql.connector as mc
 
 
@@ -31,12 +32,9 @@ class SignUp(object):
         self.label.setFont(font)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
-        self.surnameEdit = QtWidgets.QLineEdit(Form)
-        self.surnameEdit.setGeometry(QtCore.QRect(80, 150, 301, 21))
-        self.surnameEdit.setObjectName("surnameEdit")
-        self.forenameEdit = QtWidgets.QLineEdit(Form)
-        self.forenameEdit.setGeometry(QtCore.QRect(80, 120, 301, 21))
-        self.forenameEdit.setObjectName("forenameEdit")
+        self.usernameEdit = QtWidgets.QLineEdit(Form)
+        self.usernameEdit.setGeometry(QtCore.QRect(80, 120, 301, 21))
+        self.usernameEdit.setObjectName("usernameEdit")
         self.label_4 = QtWidgets.QLabel(Form)
         self.label_4.setGeometry(QtCore.QRect(20, 150, 51, 21))
         self.label_4.setObjectName("label_4")
@@ -79,39 +77,20 @@ class SignUp(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.label.setText(_translate("Form", "Create account"))
-        self.label_4.setText(_translate("Form", "Surname:"))
-        self.label_3.setText(_translate("Form", "Forename"))
+        self.label_3.setText(_translate("Form", "Username"))
         self.label_2.setText(_translate("Form", "E-mail:"))
         self.label_5.setText(_translate("Form", "Password:"))
         self.createAccButton.setText(_translate("Form", "Create"))
 
     def signUp(self):
-        email = self.emailEdit.text()
-        forename = self.forenameEdit.text()
-        surname = self.surnameEdit.text()
+        url = "http://localhost:8080/api/auth/signup"
+        username = self.usernameEdit.text()
         password = self.passwordEdit.text()
+        email = self.emailEdit.text()
 
-        mydb = mc.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="bookstore"
-        )
+        response = requests.post(url, data={"username": username, "password": password, "email": email})
+        print(response.status_code)
 
-        mycursor = mydb.cursor()
-        mycursor.execute("SELECT email from users where email like'" + email + "'")
-        result = mycursor.fetchone()
-
-        if result is not None:
-            self.resultLabel.setStyleSheet("color: red")
-            self.resultLabel.setText("User already exists")
-        else:
-            sql = "INSERT INTO users (email, forename, surname, password) VALUES (%s, %s, %s, %s)"
-            val = (email, forename, surname, password)
-            mycursor.execute(sql, val)
-            mydb.commit()
-            self.resultLabel.setStyleSheet("color: green")
-            self.resultLabel.setText("User created")
 
 
 if __name__ == "__main__":

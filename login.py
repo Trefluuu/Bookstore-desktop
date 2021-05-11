@@ -9,10 +9,12 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import requests
 import mysql.connector as mc
 from signup import SignUp
 
 class Login(object):
+
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(400, 249)
@@ -34,9 +36,9 @@ class Login(object):
         self.label_2 = QtWidgets.QLabel(Form)
         self.label_2.setGeometry(QtCore.QRect(10, 90, 51, 21))
         self.label_2.setObjectName("label_2")
-        self.emailEdit = QtWidgets.QLineEdit(Form)
-        self.emailEdit.setGeometry(QtCore.QRect(70, 90, 301, 21))
-        self.emailEdit.setObjectName("emailEdit")
+        self.usernameEdit = QtWidgets.QLineEdit(Form)
+        self.usernameEdit.setGeometry(QtCore.QRect(70, 90, 301, 21))
+        self.usernameEdit.setObjectName("usernameEdit")
         self.label_5 = QtWidgets.QLabel(Form)
         self.label_5.setGeometry(QtCore.QRect(10, 120, 51, 21))
         self.label_5.setObjectName("label_5")
@@ -74,38 +76,22 @@ class Login(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.label.setText(_translate("Form", "Login"))
-        self.label_2.setText(_translate("Form", "E-mail:"))
+        self.label_2.setText(_translate("Form", "Username:"))
         self.label_5.setText(_translate("Form", "Password:"))
         self.loginButton.setText(_translate("Form", "Login"))
         self.signupButton.setText(_translate("Form", "Create Account"))
 
     def login(self):
-        try:
-            email = self.emailEdit.text()
-            password = self.passwordEdit.text()
+        url="http://localhost:8080/api/auth/signin"
+        username = self.usernameEdit.text()
+        password = self.passwordEdit.text()
 
-            mydb = mc.connect(
-                host="localhost",
-                user="root",
-                password="",
-                database="bookstore"
-            )
+        response = requests.post(url, data={"username": username, "password": password})
 
-            mycursor = mydb.cursor()
-            mycursor.execute(
-                "SELECT email,password from users where email like '" + email + "'and password like '" + password + "'")
-            result = mycursor.fetchone()
+        result = response.status_code
+        print(result)
+        print(response.json())
 
-            if result == None:
-                self.login_result.setStyleSheet("color: red")
-                self.login_result.setText("Failed")
-
-            else:
-                self.login_result.setStyleSheet("color: green")
-                self.login_result.setText("Successful")
-
-        except mc.Error as e:
-            self.login_result.setText("Error")
 
     def openSignUp(self):
         self.Form = QtWidgets.QWidget()
@@ -113,22 +99,6 @@ class Login(object):
         self.ui.setupUi(self.Form)
         self.Form.show()
 
-
-    def getId(self):
-        self.email
-
-        mydb = mc.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="bookstore"
-        )
-
-        mycursor = mydb.cursor()
-        mycursor.execute(
-            "SELECT id from users where email like '" + self.email + "'")
-        result = mycursor.fetchone()
-        return result
 
 
 if __name__ == "__main__":
